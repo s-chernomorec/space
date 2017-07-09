@@ -1,5 +1,5 @@
 @font-face {
-    font-family: 'aileronsregular';
+    font-family: 'Ailerons';
     src: url('../fonts/aileronsRegular/ailerons-webfont.eot');
     src: url('../fonts/aileronsRegular/ailerons-webfont.eot?#iefix') format('embedded-opentype'),
          url('../fonts/aileronsRegular/ailerons-webfont.woff2') format('woff2'),
@@ -12,7 +12,7 @@
 }
 
 @font-face {
-    font-family: 'madrasextra_light';
+    font-family: 'Madrasextra Light';
     src: url('../fonts/madras/madrasextralight-webfont.eot');
     src: url('../fonts/madras/madrasextralight-webfont.eot?#iefix') format('embedded-opentype'),
          url('../fonts/madras/madrasextralight-webfont.woff2') format('woff2'),
@@ -27,15 +27,20 @@
 body {
 	background-color: #111;
 	color: #fff;
-	font: 1.2em/1em 'madrasextra_light', Arial, sans-serif;
+	font: 1.2em/1em 'Madrasextra Light', Arial, sans-serif;
 }
 
 #main-header {
-	font: 4em/1.05em 'aileronsregular', Arial, sans-serif;
-	/*letter-spacing: 0.6em;
-	text-indent: 0.6em;*/
+	font: 4em 'Ailerons', Arial, sans-serif;
 	padding: 0;
 	cursor: default;
+}
+
+@media screen and (max-width: 1024px) {
+  #main-header {
+    font-size: 3em;
+    line-height: 200%;
+  }
 }
 
 #main-header span {
@@ -96,6 +101,18 @@ body {
 	display: inline-block;
 }
 
+#footer-hint-wrapper {
+	position: absolute;
+	bottom: 40px;
+	left: 150px;
+	font: 18px 'Courier New', monospace;
+}
+
+.footer-hint-star {
+	position: absolute;
+	left: -30px;
+}
+
 /* ------------ Animation ----------- */
 
 @-webkit-keyframes rotateLetter {
@@ -104,7 +121,7 @@ body {
 		-moz-transform: rotateY(90deg);
   	transform: rotateY(90deg);
 	}
-	
+
 	100% {
 		-webkit-transform: rotateY(0deg);
 		-moz-transform: rotateY(0deg);
@@ -118,7 +135,7 @@ body {
 		-moz-transform: rotateY(90deg);
   	transform: rotateY(90deg);
 	}
-	
+
 	100% {
 		-webkit-transform: rotateY(0deg);
 		-moz-transform: rotateY(0deg);
@@ -132,7 +149,7 @@ body {
 		-moz-transform: rotateY(90deg);
   	transform: rotateY(90deg);
 	}
-	
+
 	100% {
 		-webkit-transform: rotateY(0deg);
 		-moz-transform: rotateY(0deg);
@@ -145,7 +162,7 @@ body {
 		width: 0%;
 		left: 50%;
 	}
-	
+
 	100% {
 		width: 40%;
 		left: 30%;
@@ -157,7 +174,7 @@ body {
 		width: 0%;
 		left: 50%;
 	}
-	
+
 	100% {
 		width: 40%;
 		left: 30%;
@@ -169,7 +186,7 @@ body {
 		width: 0%;
 		left: 50%;
 	}
-	
+
 	100% {
 		width: 40%;
 		left: 30%;
@@ -244,5 +261,3 @@ body {
 .by-author-animation {
 	animation: author-animation 1.5s linear 1;
 }
-
-

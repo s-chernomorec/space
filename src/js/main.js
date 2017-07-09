@@ -1,165 +1,159 @@
-var animateLettersBlock = require("./letterAnimation");
-var helpers = require("./helpers");
-var dotsRender = require("./dotsRender");
-
-
-
 (function () {
-	
-	var canvasEl = document.getElementById('canvas-app'),
-			ctx = canvasEl.getContext('2d'),
-			// -------- Доработать взятие размеров экрана у IE 8- ----------------
-			pageWidth = document.documentElement.clientWidth,
-			pageHeight = document.documentElement.clientHeight,
-			centerX = pageWidth / 2,
-			centerY = pageHeight / 2,
-			arrOfDots = [],
-			interv,
-			randomMin = 50,
-			randomMax = 250,
-			dotsCount = 2000,
-			dotsSize = 70,
-			mouseCoordX,
-			mouseCoordY, 
-			state = false,
-			parallaxSize = 2,
-			parallaxMultiplier = randomMin * parallaxSize;
-	
-	canvasEl.width = pageWidth;
-	canvasEl.height = pageHeight;
-	
-	ctx.strokeStyle = '#fff';
-	ctx.fillStyle = '#fff';
-	
-	function clearPage(){
-		ctx.clearRect(0, 0, pageWidth, pageHeight);
-	}
-	
-	
-	// --- REMOVE THIS ---
-	function showCoords(){
-		var min1 = 0, min2 = 0, max1 = 0, max2 = 0;
-		arrOfDots.forEach(function(item, i) {
-			min1 = item[0] < min1 ? item[0] : min1;
-			min2 = item[1] < min2 ? item[1] : min2;
-			max1 = item[0] > max1 ? item[0] : max1;
-			max2 = item[1] > max2 ? item[1] : max2;
-		});
-		console.log("x min: " + Math.floor(min1) + " | y min: " + Math.floor(min2) + " pageX :" + pageWidth + " | pageY :" + pageHeight);
-		console.log("x max: " + Math.floor(max1) + " | y max: " + Math.floor(max2));
-	}
-	// ------------------
-	
-	
-	// ----- Отрисовка точек ----
-	
-	
-	arrOfDots = arrOfDots.concat(dotsRender.drawVisible(dotsCount, dotsSize, randomMin, randomMax));
-	
-	arrOfDots.forEach(function(item, i){
-		ctx.fillRect(item[0],item[1], item[3], item[3]);
-	});
-	
-	
-	// ------------ Анимация блока букв ----------------
-	
-	animateLettersBlock(500, 800, 7, 16);
-	
-	// -------------------------------------------------
-	function moveDots() {
-		ctx.clearRect(0, 0, pageWidth, pageHeight);
-		arrOfDots.forEach(function(item, i) {
-			
-			item[0] += (item[0] - mouseCoordX) * item[2];
-			item[1] += (item[1] - mouseCoordY) * item[2];
-			
-			if (item[0] > pageWidth * 2 || item[1] > pageHeight * 2) {
-				// Доделать генерацию точек с учётом уменьшьшения области просмотра
-				arrOfDots.splice(i, 1, [Math.floor(Math.random() * pageWidth), Math.floor(Math.random() * pageHeight), helpers.randomDotSpeed(randomMin, randomMax)]);
-			}
-			
-			ctx.fillRect(item[0],item[1], dotsSize * item[2], dotsSize * item[2]);
-				
-		});
-	}
-	
-	function movingForward() {
-		interv = setInterval(moveDots, 16);
-	};
-	
-	function stopMoving() { 
-		clearInterval(interv); 
-	};
-	
-	function parallax(e) {
-		console.log("bla");
-		if (!state) {
-			state = true;
-		} else {
-			ctx.clearRect(0, 0, pageWidth, pageHeight);
-			arrOfDots.forEach(function(item, i) {
-				item[0] = item[0] - (e.clientX - mouseCoordX) * item[2] * parallaxMultiplier;
-				item[1] = item[1] - (e.clientY - mouseCoordY) * item[2] * parallaxMultiplier;
-				
-//				item[0] = item[0] - (e.clientX - mouseCoordX);
-//				item[1] = item[1] - (e.clientY - mouseCoordY);
-				
-				ctx.fillRect(item[0], item[1], dotsSize * item[2], dotsSize * item[2]);
-			});
-		}
-		
-		// -- lastCoords --
-		mouseCoordX = e.clientX;
-		mouseCoordY = e.clientY;
-//		console.log("X:", mouseCoordX, "| Y:", mouseCoordY);
-		
-	}
-	
-	
-//	var parallax = function(e) {
-//		
-//		mouseCoordX = e.clientX;
-//		mouseCoordY = e.clientY;
-//		
-//		parallax = function(e) {
-	
-//			ctx.clearRect(0, 0, pageWidth, pageHeight);
-//			
-//			arrOfDots.forEach(function(item, i) {
-//				item[0] = item[0] - (e.clientX - mouseCoordX) * item[2] * parallaxMultiplier;
-//				item[1] = item[1] - (e.clientY - mouseCoordY) * item[2] * parallaxMultiplier;
-//				
-//				ctx.fillRect(item[0], item[1], dotsSize * item[2], dotsSize * item[2]);
-//			});
-//			
-//			mouseCoordX = e.clientX;
-//			mouseCoordY = e.clientY;
-//		};
-//	}
-	
-	
-	
+	"use strict";
+
+	var helpers            =   require("./modules/helpers"),
+			Dot                =   require("./modules/dotConstructor"),
+			animateLetters     =   require("./modules/lettersAnimation"),
+			dotsRender         =   require("./modules/dotsRender"),
+			dotsMove           =   require("./modules/dotsMove"),
+			dotsParallax       =   require("./modules/dotsParallax");
+
+
+	var canvasEl           =   document.getElementById('canvas-app'),
+			ctx                =   canvasEl.getContext('2d'),
+			pageWidth          =   document.documentElement.clientWidth,
+			pageHeight         =   document.documentElement.clientHeight,
+			// -------- Dots config --------
+			sizeMin            =   0.4,                      //  minimal size of dot
+			sizeMax            =   1.6,                      //  maximal size of dot
+			dotSizeIncrement   =   0.01,                     //  value by which dot size increases on each tick on mouse move
+			dotAcceleration    =   2.5,                      //  multiplier of dot speed on mouse move
+			dotsCount          =   pageHeight,               //  count of dots which will be rendered in drawVisible()
+			// -------- Letters animation --------
+			fadeOutDuration    =   800,                      //  fadeout of letters block
+			delayOfLines       =   500,                      //  delay of horizontal lines animation
+			delayOfLetters     =   800,                      //  delay of letters animation
+			speed              =   7,                        //  number of intervals needed for letter to appear
+			step               =   16,                       //  interval of animation
+			// -------- Timers/Intervals --------
+			intervTime         =   16,                       //  interval of movingForward()
+			ticksPerSecond     =   1000 / intervTime,        //  number of intervals per second
+
+			arrOfDots          =   [],
+			interv             =   null;
+
+
+	helpers.initCanvas(canvasEl, ctx, pageWidth, pageHeight);
+
+
+	// ---------- Init helpers ----------
+
+	var lastMousePosition  =   helpers.mousePosition(),
+			firstMousePosition =   helpers.mousePosition(),
+			saveLastPosition   =   helpers.saveMousePosition(lastMousePosition),
+			saveFirstPosition  =   helpers.saveMousePosition(firstMousePosition);
+
+	var clearPage          =   helpers.clearPage(ctx, pageWidth, pageHeight),
+			drawDots           =   helpers.drawDots(ctx);
+
+
+	// ---------- Init main modules ----------
+
+	dotsRender     =   dotsRender(pageWidth, pageHeight, sizeMin, sizeMax, dotsCount, arrOfDots);
+	dotsMove       =   dotsMove(pageWidth, pageHeight, sizeMin, sizeMax, dotSizeIncrement, dotAcceleration, ticksPerSecond, lastMousePosition, firstMousePosition);
+	dotsParallax   =   dotsParallax(sizeMax, lastMousePosition, saveLastPosition);
+
+
+	// ---------- Rendering dots ----------
+
+	(function drawVisible() {
+		arrOfDots = arrOfDots.concat(dotsRender.calculateVisible());
+		drawDots(arrOfDots);
+	})();
+
 	function drawHidden(e) {
-		
-		mouseCoordX = e.clientX;
-		mouseCoordY = e.clientY;
-		
-		arrOfDots = arrOfDots.concat(dotsRender.drawHidden(e, dotsCount, dotsSize, randomMin, randomMax));
-		
-		canvasEl.removeEventListener('mouseenter', drawHidden, false);
+		saveFirstPosition(e);
+		saveLastPosition(e);
+		arrOfDots = arrOfDots.concat(dotsRender.calculateHidden(e));
+
+		document.documentElement.removeEventListener('mouseenter', drawHidden, false);
 	}
+
+
+	// ---------- Letters animation ----------
+
+	animateLetters(delayOfLines, delayOfLetters, speed, step);
+
+
+	// ---------- Moving when holding mouse button ----------
+
+	function moveDots(e) {
+		clearPage();
+		arrOfDots = dotsMove.moveDots(arrOfDots);
+		drawDots(arrOfDots);
+	}
+
+	function movingForward(e) {
+		if( helpers.detectLeftButton(e) ) {
+			interv = setInterval(moveDots, intervTime);
+		}
+	};
+
+	function stopMoving() {
+		clearInterval(interv);
+	};
+
+
+	// ---------- Parallax on mouse move ----------
+
+	var parallaxInterv;
+	function parallaxFunc(e) {
+
+		clearPage();
+		arrOfDots = dotsParallax.parallax(e, arrOfDots);
+		drawDots(arrOfDots);
+		document.documentElement.removeEventListener('mousemove', parallaxFunc, false);
+
+		parallaxInterv = setTimeout(function(){
+			document.documentElement.addEventListener('mousemove', parallaxFunc, false);
+		}, 10);
+
+
+	}
+
+
+	// ---------- Fade out ----------
+
+	function fadeOut(e) {
+		var lettersBlock = document.getElementById('letters-block'),
+				hintsBlock = document.getElementById('footer-hint-wrapper'),
+				i = 100,
+				fadeInterv;
+
+		fadeInterv = setInterval(function(){
+			lettersBlock.style.opacity = i / 100;
+			hintsBlock.style.opacity = i / 100;
+ 			if (i === 0) {
+ 				lettersBlock.style.display = "none";
+ 				hintsBlock.style.display = "none";
+ 				clearInterval(fadeInterv);
+ 			}
+ 			i -= 1
+ 		}, fadeOutDuration / i);
+	 }
+
+
+	// ---------- Handlers ----------
 	
+	function exposeMoving(e) {
+		fadeOut(e);
+		
+		document.documentElement.addEventListener('mousedown', movingForward, false);
+
+		document.documentElement.addEventListener('mouseup', stopMoving, false);
+	}
+
+	document.documentElement.addEventListener('mouseenter', drawHidden, false);
+
+//	document.documentElement.addEventListener('mousedown', movingForward, false);
+//
+//	document.documentElement.addEventListener('mouseup', stopMoving, false);
+
+	document.documentElement.addEventListener('mousemove', parallaxFunc, false);
+
+//	document.documentElement.addEventListener('mousedown', fadeOut, false);
 	
-	
-	
-	
-	canvasEl.addEventListener('mouseenter', drawHidden, false);
-	
-	canvasEl.addEventListener('mousedown', movingForward, false);
-	
-	canvasEl.addEventListener('mouseup', stopMoving, false);
-	
-	canvasEl.addEventListener('mousemove', parallax, false);
-	
-	
+	document.documentElement.addEventListener('mousedown', exposeMoving, false);
+
+
 })();
