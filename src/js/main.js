@@ -6,7 +6,8 @@
 			animateLetters     =   require("./modules/lettersAnimation"),
 			dotsRender         =   require("./modules/dotsRender"),
 			dotsMove           =   require("./modules/dotsMove"),
-			dotsParallax       =   require("./modules/dotsParallax");
+			dotsParallax       =   require("./modules/dotsParallax"),
+			fadeOut            =   require("./modules/fadeOut");
 
 
 	var canvasEl           =   document.getElementById('canvas-app'),
@@ -30,7 +31,11 @@
 			ticksPerSecond     =   1000 / intervTime,        //  number of intervals per second
 
 			arrOfDots          =   [],
-			interv             =   null;
+			interv             =   null,
+			// -------- fadeOut elements --------
+			lettersBlock       = document.getElementById('letters-block'),
+			hintsBlock         = document.getElementById('footer-hint-wrapper');
+
 
 
 	helpers.initCanvas(canvasEl, ctx, pageWidth, pageHeight);
@@ -98,61 +103,34 @@
 
 	var parallaxInterv;
 	function parallaxFunc(e) {
-
 		clearPage();
 		arrOfDots = dotsParallax.parallax(e, arrOfDots);
 		drawDots(arrOfDots);
+
 		document.documentElement.removeEventListener('mousemove', parallaxFunc, false);
 
 		parallaxInterv = setTimeout(function(){
 			document.documentElement.addEventListener('mousemove', parallaxFunc, false);
 		}, 10);
-
-
 	}
 
 
-	// ---------- Fade out ----------
-
-	function fadeOut(e) {
-		var lettersBlock = document.getElementById('letters-block'),
-				hintsBlock = document.getElementById('footer-hint-wrapper'),
-				i = 100,
-				fadeInterv;
-
-		fadeInterv = setInterval(function(){
-			lettersBlock.style.opacity = i / 100;
-			hintsBlock.style.opacity = i / 100;
- 			if (i === 0) {
- 				lettersBlock.style.display = "none";
- 				hintsBlock.style.display = "none";
- 				clearInterval(fadeInterv);
- 			}
- 			i -= 1
- 		}, fadeOutDuration / i);
-	 }
-
-
 	// ---------- Handlers ----------
-	
+
 	function exposeMoving(e) {
-		fadeOut(e);
-		
+		fadeOut(fadeOutDuration, [lettersBlock, hintsBlock]);
+
 		document.documentElement.addEventListener('mousedown', movingForward, false);
 
 		document.documentElement.addEventListener('mouseup', stopMoving, false);
+
+		document.documentElement.removeEventListener('mousedown', exposeMoving, false);
 	}
 
 	document.documentElement.addEventListener('mouseenter', drawHidden, false);
 
-//	document.documentElement.addEventListener('mousedown', movingForward, false);
-//
-//	document.documentElement.addEventListener('mouseup', stopMoving, false);
-
 	document.documentElement.addEventListener('mousemove', parallaxFunc, false);
 
-//	document.documentElement.addEventListener('mousedown', fadeOut, false);
-	
 	document.documentElement.addEventListener('mousedown', exposeMoving, false);
 
 

@@ -7,11 +7,8 @@ module.exports = function (pageWidth, pageHeight, sizeMin, sizeMax, dotSizeIncre
   function dotOutOfRange(dot) {
 		var lastX = lastMousePosition.getX(),
 				lastY = lastMousePosition.getY();
-		if ((dot.x > (pageWidth - lastX) + pageWidth || dot.x < -lastX) || (dot.y > (pageHeight - lastY) + pageHeight || dot.y < -lastY)) {
-			return true;
-		} else {
-			return false;
-		}
+
+		return ((dot.x > (pageWidth - lastX) + pageWidth || dot.x < -lastX) || (dot.y > (pageHeight - lastY) + pageHeight || dot.y < -lastY));
 	}
 
 	function recalculateOutOfRangeDot(arr, item, i) {

@@ -46,7 +46,6 @@ module.exports = function (pageWidth, pageHeight, sizeMin, sizeMax, dotsCount, a
 		};
 
 
-
 		for (var s in sides) {
 
 			var dotsOnSide = Math.floor(sides[s].ratioX * sides[s].ratioY * dotsCount);
