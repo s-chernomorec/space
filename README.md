@@ -1,1 +1,1 @@
-# jsSpace
+# Small canvas app
